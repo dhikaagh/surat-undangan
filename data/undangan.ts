@@ -3,67 +3,76 @@
 //  Edit teks di bawah, simpan, halaman langsung berubah.
 // ============================================================
 
-export type RundownItem = {
-  waktu: string;
-  acara: string;
-  catatan?: string;
+export type Narahubung = {
+  nama: string;
+  peran: string;
+  /** Format internasional tanpa tanda "+" dan tanpa spasi. Contoh: 6281234567890 */
+  whatsapp: string;
+};
+
+export type CatatanPenting = {
+  judul: string;
+  isi: string;
 };
 
 export const undangan = {
-  namaAcara: "Temu Angkatan 26",
-  tema: "Merajut Silaturahmi, Menguatkan Solidaritas",
+  namaAcara: "Kumpul Angkatan Telekomunikasi 2026",
+  tagline: "UNIFY",
+  tema: "One Generation, One Unity",
   jurusan: "Teknik Telekomunikasi",
   angkatan: "Angkatan 2026",
-  penyelenggara: "Keluarga Mahasiswa Teknik Telekomunikasi",
+  penyelenggara: "Keluarga Mahasiswa Teknik Telekomunikasi 2026",
 
   pembuka:
-    "Dengan penuh rasa syukur, kami mengundang seluruh mahasiswa Teknik Telekomunikasi Angkatan 2026 untuk hadir dalam acara kumpul angkatan.",
+    "Kesempatan buat kita saling mengenal lebih dekat, mempererat kebersamaan, dan membangun solidaritas antar teman satu angkatan. Jangan sampai kelewatan.",
 
   tanggal: {
     // Format ISO dipakai untuk hitungan mundur (countdown).
-    iso: "2027-02-13T09:00:00+07:00",
+    iso: "2026-11-22T09:00:00+07:00",
+    // Dipakai untuk membedakan "sedang berlangsung" dan "telah selesai".
+    selesaiIso: "2026-11-22T13:00:00+07:00",
     // Teks yang ditampilkan di halaman.
-    label: "Sabtu, 13 Februari 2027",
+    label: "Minggu, 22 November 2026",
   },
 
-  waktu: "09.00 WIB — selesai",
+  waktu: "09.00 — 13.00 WIB",
 
   tempat: {
-    nama: "Gedung Serbaguna Kampus",
-    alamat: "Jl. Contoh No. 1, Bandung",
+    nama: "Kodjo Coffee",
+    alamat: "Jl. Sari Endah No. 17b, Sukarasa, Sukasari, Kota Bandung",
   },
 
-  dresscode: "Batik / Smart Casual",
+  catatanPenting: [
+    {
+      judul: "Bawa ponco plastik",
+      isi: "Jaga-jaga kalau hujan turun di tengah acara.",
+    },
+    {
+      judul: "Hadir tepat waktu",
+      isi: "Acara dimulai pukul 09.00 WIB.",
+    },
+    {
+      judul: "Baju angkatan",
+      isi: "Peserta kumpul angkatan dapat baju Telekomunikasi 2026.",
+    },
+  ] satisfies CatatanPenting[],
 
-  rundown: [
-    { waktu: "09.00", acara: "Registrasi & Sarapan Pagi" },
-    { waktu: "09.30", acara: "Pembukaan", catatan: "Sambutan panitia & doa bersama" },
-    { waktu: "10.00", acara: "Sesi Perkenalan Angkatan" },
-    { waktu: "11.30", acara: "Diskusi & Sharing Alumni" },
-    { waktu: "12.30", acara: "Makan Siang Bersama" },
-    { waktu: "13.30", acara: "Games & Ice Breaking" },
-    { waktu: "15.30", acara: "Penutupan & Foto Bersama" },
-  ] satisfies RundownItem[],
-
-  konfirmasi: {
-    nama: "Ketua Panitia",
-    // Format internasional tanpa tanda "+" dan tanpa spasi. Contoh: 6281234567890
-    whatsapp: "6281234567890",
-    pesan:
-      "Halo, saya mahasiswa Teknik Telekomunikasi Angkatan 2026. Saya ingin konfirmasi kehadiran untuk Temu Angkatan 26.",
-    batas: "5 Februari 2027",
-  },
-
-  catatan:
-    "Mohon konfirmasi kehadiran sebelum tanggal batas agar panitia dapat menyiapkan konsumsi dan tempat duduk.",
+  narahubung: [
+    { nama: "Khaiqal", peran: "C-TNK", whatsapp: "6281214832666" },
+    { nama: "Barra", peran: "A-TTE", whatsapp: "6285703438635" },
+  ] satisfies Narahubung[],
 } as const;
+
+/** Pesan yang sudah terisi saat tombol WhatsApp ditekan. */
+export const pesanWhatsapp =
+  "Halo, saya dari angkatan Telekomunikasi 2026. Saya mau tanya soal Kumpul Angkatan 2026.";
 
 /** Link Google Maps dari nama + alamat tempat. */
 export const alamatMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
   `${undangan.tempat.nama}, ${undangan.tempat.alamat}`,
 )}`;
 
-/** Link WhatsApp untuk konfirmasi kehadiran. */
-export const whatsappUrl = `https://wa.me/${undangan.konfirmasi.whatsapp}?text=${encodeURIComponent(
-  undangan.konfirmasi.pesan,
-)}`;
+/** Link WhatsApp ke salah satu narahubung. */
+export function whatsappUrl(nomor: string): string {
+  return `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWhatsapp)}`;
+}

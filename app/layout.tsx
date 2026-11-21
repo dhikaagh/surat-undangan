@@ -16,13 +16,25 @@ const sans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const judul = `Undangan ${undangan.namaAcara} — ${undangan.tagline}`;
+const deskripsi = `${undangan.tema}. ${undangan.tanggal.label}, ${undangan.waktu}, ${undangan.tempat.nama}.`;
+
+// Vercel menyediakan URL deployment lewat environment variable, jadi og:image
+// tetap absolut tanpa konfigurasi manual — termasuk saat diakses sebagai
+// preview deployment, yang punya domain berbeda dari domain produksi.
+const urlDeploy = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+const urlDasar = urlDeploy ? `https://${urlDeploy}` : "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: `Undangan ${undangan.namaAcara} — ${undangan.jurusan}`,
-  description: `${undangan.pembuka} ${undangan.tanggal.label}, ${undangan.waktu}, ${undangan.tempat.nama}.`,
+  metadataBase: new URL(urlDasar),
+  title: judul,
+  description: deskripsi,
   openGraph: {
-    title: `Undangan ${undangan.namaAcara}`,
-    description: `${undangan.tema} — ${undangan.jurusan} ${undangan.angkatan}`,
+    title: judul,
+    description: deskripsi,
     type: "website",
+    locale: "id_ID",
+    siteName: undangan.namaAcara,
   },
 };
 

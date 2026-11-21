@@ -1,29 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { dua, hitungSisa, statusAcara } from "@/lib/hitung-sisa";
 
-type Sisa = { hari: number; jam: number; menit: number; detik: number };
+const SATUAN = ["hari", "jam", "menit", "detik"] as const;
 
-function hitungSisa(target: number, sekarang: number): Sisa | null {
-  const selisih = target - sekarang;
-  if (selisih <= 0) return null;
-
-  const totalDetik = Math.floor(selisih / 1000);
-  return {
-    hari: Math.floor(totalDetik / 86_400),
-    jam: Math.floor((totalDetik % 86_400) / 3_600),
-    menit: Math.floor((totalDetik % 3_600) / 60),
-    detik: totalDetik % 60,
-  };
-}
-
-const dua = (n: number) => String(n).padStart(2, "0");
+const LABEL: Record<(typeof SATUAN)[number], string> = {
+  hari: "Hari",
+  jam: "Jam",
+  menit: "Menit",
+  detik: "Detik",
+};
 
 export default function Countdown({
   targetIso,
+  selesaiIso,
   className = "",
 }: {
   targetIso: string;
+  selesaiIso: string;
   className?: string;
 }) {
   // null = belum jalan di browser, supaya tidak hydration mismatch.
@@ -39,33 +34,40 @@ export default function Countdown({
     };
   }, []);
 
-  const sisa = sekarang === null ? null : hitungSisa(new Date(targetIso).getTime(), sekarang);
-  const selesai = sekarang !== null && sisa === null;
+  // Sebelum JavaScript hidup, sisakan ruang setinggi deretan kotak supaya
+  // tata letak tidak melompat saat kotak aslinya muncul.
+  if (sekarang === null) {
+    return <div className={`min-h-[6.75rem] sm:min-h-[9.5rem] ${className}`} aria-hidden="true" />;
+  }
 
-  const kotak = sisa
-    ? [
-        { label: "Hari", nilai: String(sisa.hari) },
-        { label: "Jam", nilai: dua(sisa.jam) },
-        { label: "Menit", nilai: dua(sisa.menit) },
-        { label: "Detik", nilai: dua(sisa.detik) },
-      ]
-    : [
-        { label: "Hari", nilai: "--" },
-        { label: "Jam", nilai: "--" },
-        { label: "Menit", nilai: "--" },
-        { label: "Detik", nilai: "--" },
-      ];
+  const mulai = new Date(targetIso).getTime();
+  const selesai = new Date(selesaiIso).getTime();
+  const status = statusAcara(mulai, selesai, sekarang);
 
-  if (selesai) {
+  if (status !== "menuju") {
     return (
       <p className={`font-display text-2xl text-gold ${className}`}>
-        Acara telah berlangsung.
+        {status === "berlangsung"
+          ? "Acara sedang berlangsung."
+          : "Acara telah selesai."}
       </p>
     );
   }
 
+  const sisa = hitungSisa(mulai, sekarang);
+  const kotak = SATUAN
+    // Kotak "Hari" tidak berguna saat acara tinggal hitungan jam.
+    .filter((satuan) => satuan !== "hari" || (sisa?.hari ?? 0) > 0)
+    .map((satuan) => ({
+      label: LABEL[satuan],
+      nilai: satuan === "hari" ? String(sisa?.hari ?? 0) : dua(sisa?.[satuan] ?? 0),
+    }));
+
   return (
-    <div className={`grid grid-cols-4 gap-2 sm:gap-4 ${className}`}>
+    <div
+      className={`grid gap-2 sm:gap-4 ${className}`}
+      style={{ gridTemplateColumns: `repeat(${kotak.length}, minmax(0, 1fr))` }}
+    >
       {kotak.map((k) => (
         <div
           key={k.label}

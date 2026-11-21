@@ -32,3 +32,11 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* Tanpa JavaScript, gerbang amplop tidak akan pernah terbuka —
+   sembunyikan supaya undangan tetap terbaca. */
+@media (scripting: none) {
+  .amplop {
+    display: none !important;
+  }
+}
